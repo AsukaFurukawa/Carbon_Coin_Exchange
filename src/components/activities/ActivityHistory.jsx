@@ -17,7 +17,7 @@ import {
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { activities } from '../../lib/api';
+import { activities } from '../../lib/api.jsx';
 import { ActivityType, VerificationStatus } from '../../types/activity';
 
 const StatusBadge = ({ status }) => {
@@ -35,10 +35,10 @@ export const ActivityHistory = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: activityList, isLoading, error } = useQuery(
-    ['activities'],
-    activities.getAll
-  );
+  const { data: activityList, isLoading, error } = useQuery({
+    queryKey: ['activities'],
+    queryFn: activities.getAll
+  });
 
   if (isLoading) return <Spinner />;
   if (error) return <Text color="red.500">Error loading activities</Text>;
@@ -62,7 +62,6 @@ export const ActivityHistory = () => {
         <Select
           value={activityFilter}
           onChange={(e) => setActivityFilter(e.target.value)}
-          placeholder="Filter by activity"
         >
           <option value="ALL">All Activities</option>
           {Object.values(ActivityType).map((type) => (
@@ -75,7 +74,6 @@ export const ActivityHistory = () => {
         <Select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          placeholder="Filter by status"
         >
           <option value="ALL">All Statuses</option>
           {Object.values(VerificationStatus).map((status) => (

@@ -27,13 +27,16 @@ export const LoginForm = () => {
     setIsLoading(true);
     try {
       await login(email, password);
+      console.log('Login successful');
       toast({
         title: 'Login successful',
         status: 'success',
         duration: 3000,
       });
       navigate('/');
+      console.log('Navigation attempted');
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: 'Login failed',
         description: error.message,

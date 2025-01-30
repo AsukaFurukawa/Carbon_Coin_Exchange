@@ -11,7 +11,11 @@ import { useQuery } from '@tanstack/react-query';
 import { activities } from '../../lib/api.jsx';
 
 export const ActivityStats = () => {
-  const { data: stats } = useQuery(['activityStats'], activities.getStats);
+  const { data: stats } = useQuery({
+    queryKey: ['activityStats'],
+    queryFn: activities.getStats
+  });
+  
   const bgColor = useColorModeValue('white', 'gray.800');
 
   return (

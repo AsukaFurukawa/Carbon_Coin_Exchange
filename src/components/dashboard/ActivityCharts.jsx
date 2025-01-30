@@ -25,8 +25,15 @@ import { activities } from '../../lib/api.jsx';
 const COLORS = ['#319795', '#38B2AC', '#4FD1C5', '#81E6D9', '#B2F5EA'];
 
 export const ActivityCharts = () => {
-  const { data: stats } = useQuery(['activityStats'], activities.getStats);
-  const { data: activityList } = useQuery(['activities'], activities.getAll);
+  const { data: stats } = useQuery({
+    queryKey: ['activityStats'],
+    queryFn: activities.getStats
+  });
+  
+  const { data: activityList } = useQuery({
+    queryKey: ['activities'],
+    queryFn: activities.getAll
+  });
   
   const bgColor = useColorModeValue('white', 'gray.800');
   const textColor = useColorModeValue('gray.800', 'white');
