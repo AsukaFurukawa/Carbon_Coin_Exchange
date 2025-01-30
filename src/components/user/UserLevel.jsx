@@ -6,6 +6,7 @@ import {
   HStack,
   Badge,
   Tooltip,
+  Spinner,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { activities } from '../../lib/api.jsx';
@@ -14,18 +15,14 @@ import {
   getCurrentLevel,
   getProgressToNextLevel,
 } from '../../utils/activityLevels';
+import { useStatsStore } from '../../stores/statsStore';
 
 export const UserLevel = () => {
-  const { data: stats } = useQuery({
-    queryKey: ['activityStats'],
-    queryFn: activities.getStats
-  });
+  const totalPoints = useStatsStore((state) => state.totalPoints);
 
-  if (!stats) return null;
-
-  const currentLevelKey = getCurrentLevel(stats.totalPoints);
+  const currentLevelKey = getCurrentLevel(totalPoints);
   const currentLevel = ACTIVITY_LEVELS[currentLevelKey];
-  const progress = getProgressToNextLevel(stats.totalPoints);
+  const progress = getProgressToNextLevel(totalPoints);
   const nextLevelKey = Object.keys(ACTIVITY_LEVELS)[
     Object.keys(ACTIVITY_LEVELS).indexOf(currentLevelKey) + 1
   ];
@@ -42,7 +39,7 @@ export const UserLevel = () => {
         </HStack>
 
         <Tooltip
-          label={`${stats.totalPoints} / ${currentLevel.maxPoints} points`}
+          label={`${totalPoints} / ${currentLevel.maxPoints} points`}
           hasArrow
         >
           <Progress
@@ -54,7 +51,7 @@ export const UserLevel = () => {
         </Tooltip>
 
         <HStack justify="space-between" fontSize="sm" color="gray.500">
-          <Text>{stats.totalPoints} points</Text>
+          <Text>{totalPoints} points</Text>
           {nextLevel && (
             <Text>Next: {nextLevel.name} ({currentLevel.maxPoints + 1} pts)</Text>
           )}

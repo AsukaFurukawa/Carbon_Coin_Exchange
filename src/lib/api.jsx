@@ -11,6 +11,13 @@ export const activities = {
     return new Promise((resolve) => {
       setTimeout(() => {
         const points = calculateActivityPoints(data);
+        // Update daily challenge progress
+        const challengeProgress = {
+          WALKING: data.activityType === 'WALKING' ? data.measurement : 0,
+          PUBLIC_TRANSPORT: data.activityType === 'PUBLIC_TRANSPORT' ? data.measurement : 0,
+          RECYCLING: data.activityType === 'RECYCLING' ? data.measurement : 0,
+        };
+
         const mockResponse = {
           id: Math.random().toString(36).substr(2, 9),
           ...data,
@@ -18,12 +25,13 @@ export const activities = {
           verificationStatus: 'PENDING',
           pointsEarned: points,
           rewards: {
-            coins: 10,
+            coins: calculateReward(data, points),
             bonuses: [
               { type: 'STREAK', amount: 5, message: '3-day streak bonus!' },
               { type: 'LEVEL_UP', amount: 50, message: 'Level up reward!' },
             ],
           },
+          challengeProgress,
         };
         resolve(mockResponse);
       }, 1000);
@@ -67,10 +75,15 @@ export const activities = {
     // TODO: Replace with actual API call
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Get stored stats or initialize
+        const storedStats = JSON.parse(localStorage.getItem('carbonStats')) || {
+          totalActivities: 0,
+          totalCoinsEarned: 0,
+          totalPoints: 0,
+        };
+
         resolve({
-          totalActivities: 10,
-          totalCoinsEarned: 150,
-          totalPoints: 250, // This will determine the user's level
+          ...storedStats,
           verificationStats: {
             pending: 3,
             approved: 7,
@@ -166,9 +179,10 @@ export const challenges = {
             name: 'Walking Warrior',
             description: 'Walk 10,000 steps today',
             type: 'DAILY',
+            activityType: 'WALKING',
             reward: 20,
             progress: {
-              current: 8500,
+              current: 0,
               required: 10000,
             },
             unit: 'steps',
@@ -179,22 +193,24 @@ export const challenges = {
             name: 'Eco Commuter',
             description: 'Use public transport for your commute',
             type: 'DAILY',
+            activityType: 'PUBLIC_TRANSPORT',
             reward: 30,
             progress: {
-              current: 1,
+              current: 0,
               required: 1,
             },
             unit: 'trips',
-            completed: true,
+            completed: false,
           },
           {
             id: '3',
             name: 'Recycling Hero',
             description: 'Recycle 2kg of materials',
             type: 'DAILY',
+            activityType: 'RECYCLING',
             reward: 25,
             progress: {
-              current: 1.5,
+              current: 0,
               required: 2,
             },
             unit: 'kg',
@@ -204,4 +220,18 @@ export const challenges = {
       }, 1000);
     });
   },
+};
+
+// Helper function to calculate rewards based on activity and points
+const calculateReward = (activity, points) => {
+  const baseRewards = {
+    WALKING: 1, // coins per 1000 steps or km
+    CYCLING: 2, // coins per km
+    PUBLIC_TRANSPORT: 3, // coins per km
+    RECYCLING: 5, // coins per kg
+    ENERGY_SAVING: 2, // coins per kWh
+  };
+
+  const reward = baseRewards[activity.activityType];
+  return Math.floor(points * reward);
 }; 

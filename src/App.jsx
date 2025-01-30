@@ -9,10 +9,18 @@ import { Navbar } from './components/layout/Navbar'
 import { theme } from './theme'
 import { ActivityForm } from './components/activities/ActivityForm'
 import { Marketplace } from './pages/Marketplace'
+import { useStatsStore } from './stores/statsStore'
+import { useEffect } from 'react'
 
 const queryClient = new QueryClient()
 
 function App() {
+  const initializeStore = useStatsStore((state) => state.initializeStore)
+  
+  useEffect(() => {
+    initializeStore()
+  }, [initializeStore])
+
   return (
     <ChakraProvider theme={theme}>
       <CSSReset />

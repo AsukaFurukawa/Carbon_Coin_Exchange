@@ -9,12 +9,10 @@ import {
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { activities } from '../../lib/api.jsx';
+import { useStatsStore } from '../../stores/statsStore';
 
 export const ActivityStats = () => {
-  const { data: stats } = useQuery({
-    queryKey: ['activityStats'],
-    queryFn: activities.getStats
-  });
+  const stats = useStatsStore();
   
   const bgColor = useColorModeValue('white', 'gray.800');
 

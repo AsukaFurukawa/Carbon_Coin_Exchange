@@ -1,4 +1,4 @@
-import { Box, Container, VStack, Heading, Tabs, TabList, TabPanels, Tab, TabPanel, SimpleGrid } from '@chakra-ui/react';
+import { Box, Container, VStack, Heading, Tabs, TabList, TabPanels, Tab, TabPanel, SimpleGrid, Spinner, Center } from '@chakra-ui/react';
 import { ActivityForm } from '../components/activities/ActivityForm';
 import { ActivityHistory } from '../components/activities/ActivityHistory';
 import { ActivityStats } from '../components/dashboard/ActivityStats';
@@ -12,10 +12,18 @@ import { activities } from '../lib/api.jsx';
 
 export const Dashboard = () => {
   const { user } = useAuthStore();
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['activityStats'],
     queryFn: activities.getStats
   });
+
+  if (statsLoading) {
+    return (
+      <Center h="100vh">
+        <Spinner size="xl" color="brand.500" />
+      </Center>
+    );
+  }
 
   return (
     <Container maxW="container.xl" py={8}>

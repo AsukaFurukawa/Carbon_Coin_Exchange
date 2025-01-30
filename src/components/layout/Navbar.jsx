@@ -9,10 +9,12 @@ import {
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { ColorModeToggle } from '../common/ColorModeToggle';
+import { useHeaderStore } from '../../stores/headerStore';
 
 export const Navbar = () => {
   const { user, logout } = useAuthStore();
   const bgColor = useColorModeValue('white', 'gray.800');
+  const coins = useHeaderStore((state) => state.coins);
 
   return (
     <Box bg={bgColor} px={4} shadow="sm">
@@ -28,7 +30,7 @@ export const Navbar = () => {
               <Button as={RouterLink} to="/activities" variant="ghost">
                 Activities
               </Button>
-              <Text>{user.carbonCoins} CC</Text>
+              <Text>{coins} CC</Text>
               <Button onClick={logout}>Logout</Button>
             </>
           ) : (

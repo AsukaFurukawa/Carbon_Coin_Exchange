@@ -7,18 +7,70 @@ import {
   Icon,
   Button,
   Badge,
+  useToast,
 } from '@chakra-ui/react';
 import { FaCoins } from 'react-icons/fa';
 import { useQuery } from '@tanstack/react-query';
 import { challenges } from '../../lib/api.jsx';
+import { useStatsStore } from '../../stores/statsStore';
+import { useEffect, useRef } from 'react';
 
 export const DailyChallenge = () => {
   const { data: dailyChallenges } = useQuery({
     queryKey: ['dailyChallenges'],
     queryFn: challenges.getDaily
   });
+  const challengeProgress = useStatsStore((state) => state.challengeProgress);
+  const completedChallenges = useStatsStore((state) => state.completedChallenges);
+  const toast = useToast();
+  const previousCompletions = useRef(new Set());
 
-  if (!dailyChallenges) return null;
+  // Map challenge IDs to activity types
+  const challengeToActivityType = {
+    '1': 'WALKING',        // Walking Warrior
+    '2': 'PUBLIC_TRANSPORT', // Eco Commuter
+    '3': 'RECYCLING'       // Recycling Hero
+  };
+
+  // Update challenge progress with stored progress
+  const updatedChallenges = dailyChallenges?.map(challenge => {
+    const activityType = challengeToActivityType[challenge.id];
+    const currentProgress = challengeProgress[activityType] || 0;
+    const wasCompletedBefore = completedChallenges.includes(challenge.id);
+    const isCompletedNow = currentProgress >= challenge.progress.required;
+
+    return {
+      ...challenge,
+      progress: {
+        ...challenge.progress,
+        current: currentProgress,
+      },
+      completed: isCompletedNow,
+    };
+  });
+
+  // Handle challenge completion toasts
+  useEffect(() => {
+    if (!updatedChallenges) return;
+    
+    updatedChallenges.forEach(challenge => {
+      const isNewlyCompleted = challenge.completed && 
+        !previousCompletions.current.has(challenge.id);
+      
+      if (isNewlyCompleted) {
+        toast({
+          title: 'Challenge Completed!',
+          description: `You earned ${challenge.reward} CC for completing "${challenge.name}"!`,
+          status: 'success',
+          duration: 5000,
+          position: 'bottom-right',
+        });
+        previousCompletions.current.add(challenge.id);
+      }
+    });
+  }, [updatedChallenges, toast]);
+
+  if (!updatedChallenges) return null;
 
   return (
     <Box p={4} borderWidth="1px" borderRadius="lg">
@@ -26,11 +78,11 @@ export const DailyChallenge = () => {
         <HStack justify="space-between">
           <Text fontWeight="bold">Daily Challenges</Text>
           <Badge colorScheme="purple">
-            {dailyChallenges.filter(c => c.completed).length} / {dailyChallenges.length}
+            {updatedChallenges.filter(c => c.completed).length} / {updatedChallenges.length}
           </Badge>
         </HStack>
 
-        {dailyChallenges.map((challenge) => (
+        {updatedChallenges.map((challenge) => (
           <Box
             key={challenge.id}
             p={4}

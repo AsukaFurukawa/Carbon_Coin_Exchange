@@ -14,6 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { activities } from '../../lib/api.jsx';
 import { ActivityType, MeasurementUnit } from '../../types/activity';
 import { ActivityUpload } from './ActivityUpload';
+import { useStatsStore } from '../../stores/statsStore';
 
 export const ActivityForm = () => {
   const [activityType, setActivityType] = useState(ActivityType.WALKING);
@@ -21,12 +22,14 @@ export const ActivityForm = () => {
   const [unit, setUnit] = useState(MeasurementUnit.STEPS);
   const toast = useToast();
   const queryClient = useQueryClient();
+  const updateStats = useStatsStore((state) => state.updateStats);
 
   const { mutate, isLoading } = useMutation({
     mutationFn: activities.submit,
     onSuccess: (response) => {
       queryClient.invalidateQueries(['activities']);
       queryClient.invalidateQueries(['activityStats']);
+      updateStats(response);
       toast({
         title: 'Activity submitted successfully',
         description: `Earned ${response.pointsEarned} points and ${response.rewards.coins} CC!`,
