@@ -11,8 +11,9 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { activities } from '../../lib/api';
+import { activities } from '../../lib/api.jsx';
 import { ActivityType, MeasurementUnit } from '../../types/activity';
+import { ActivityUpload } from './ActivityUpload';
 
 export const ActivityForm = () => {
   const [activityType, setActivityType] = useState(ActivityType.WALKING);
@@ -23,18 +24,31 @@ export const ActivityForm = () => {
 
   const { mutate, isLoading } = useMutation({
     mutationFn: activities.submit,
-    onSuccess: () => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries(['activities']);
+      queryClient.invalidateQueries(['activityStats']);
       toast({
         title: 'Activity submitted successfully',
+        description: `Earned ${response.pointsEarned} points and ${response.rewards.coins} CC!`,
         status: 'success',
         duration: 3000,
       });
+      response.rewards.bonuses?.forEach((bonus) => {
+        toast({
+          title: 'Bonus Reward!',
+          description: `${bonus.message} +${bonus.amount} CC`,
+          status: 'success',
+          duration: 3000,
+          position: 'bottom-right'
+        });
+      });
       setMeasurement('');
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Submit error:', error);
       toast({
         title: 'Failed to submit activity',
+        description: error.message || 'Please try again',
         status: 'error',
         duration: 3000,
       });
@@ -43,6 +57,15 @@ export const ActivityForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!measurement || Number(measurement) <= 0) {
+      toast({
+        title: 'Invalid measurement',
+        description: 'Please enter a valid number greater than 0',
+        status: 'error',
+        duration: 3000,
+      });
+      return;
+    }
     mutate({
       activityType,
       measurement: Number(measurement),
@@ -125,6 +148,13 @@ export const ActivityForm = () => {
             </Button>
           </VStack>
         </form>
+
+        {(activityType === ActivityType.PUBLIC_TRANSPORT ||
+          activityType === ActivityType.RECYCLING) && (
+          <Box mt={4}>
+            <ActivityUpload activityType={activityType} />
+          </Box>
+        )}
       </VStack>
     </Box>
   );

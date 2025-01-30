@@ -8,9 +8,9 @@ export const ActivityType = {
 
 export const MeasurementUnit = {
   STEPS: 'STEPS',
-  KILOMETERS: 'KM',
+  KILOMETERS: 'KILOMETERS',
   KWH: 'KWH',
-  KILOGRAMS: 'KG',
+  KILOGRAMS: 'KILOGRAMS',
 };
 
 export const VerificationStatus = {

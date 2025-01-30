@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { calculateActivityPoints } from '../utils/activityLevels';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
@@ -9,12 +10,22 @@ export const activities = {
     // TODO: Replace with actual API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve({
+        const points = calculateActivityPoints(data);
+        const mockResponse = {
           id: Math.random().toString(36).substr(2, 9),
           ...data,
           timestamp: new Date().toISOString(),
           verificationStatus: 'PENDING',
-        });
+          pointsEarned: points,
+          rewards: {
+            coins: 10,
+            bonuses: [
+              { type: 'STREAK', amount: 5, message: '3-day streak bonus!' },
+              { type: 'LEVEL_UP', amount: 50, message: 'Level up reward!' },
+            ],
+          },
+        };
+        resolve(mockResponse);
       }, 1000);
     });
   },
@@ -59,11 +70,44 @@ export const activities = {
         resolve({
           totalActivities: 10,
           totalCoinsEarned: 150,
+          totalPoints: 250, // This will determine the user's level
           verificationStats: {
             pending: 3,
             approved: 7,
             rejected: 0,
           },
+          streaks: {
+            current: 3,
+            longest: 5,
+          },
+          achievements: [
+            {
+              id: 'first-activity',
+              name: 'First Step',
+              description: 'Submit your first activity',
+              earned: true,
+              date: '2024-01-30',
+            },
+            {
+              id: 'three-day-streak',
+              name: 'Consistency',
+              description: 'Maintain a 3-day activity streak',
+              earned: true,
+              date: '2024-01-30',
+            },
+          ],
+        });
+      }, 1000);
+    });
+  },
+
+  uploadProof: async (formData) => {
+    // TODO: Replace with actual API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          success: true,
+          message: 'Proof uploaded successfully',
         });
       }, 1000);
     });
@@ -106,6 +150,57 @@ export const rewards = {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({ success: true });
+      }, 1000);
+    });
+  },
+};
+
+export const challenges = {
+  getDaily: async () => {
+    // TODO: Replace with actual API call
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([
+          {
+            id: '1',
+            name: 'Walking Warrior',
+            description: 'Walk 10,000 steps today',
+            type: 'DAILY',
+            reward: 20,
+            progress: {
+              current: 8500,
+              required: 10000,
+            },
+            unit: 'steps',
+            completed: false,
+          },
+          {
+            id: '2',
+            name: 'Eco Commuter',
+            description: 'Use public transport for your commute',
+            type: 'DAILY',
+            reward: 30,
+            progress: {
+              current: 1,
+              required: 1,
+            },
+            unit: 'trips',
+            completed: true,
+          },
+          {
+            id: '3',
+            name: 'Recycling Hero',
+            description: 'Recycle 2kg of materials',
+            type: 'DAILY',
+            reward: 25,
+            progress: {
+              current: 1.5,
+              required: 2,
+            },
+            unit: 'kg',
+            completed: false,
+          },
+        ]);
       }, 1000);
     });
   },
