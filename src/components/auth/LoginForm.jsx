@@ -7,8 +7,8 @@ import {
   VStack,
   Heading,
   Text,
+  Link,
   useToast,
-  FormErrorMessage,
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
@@ -17,15 +17,14 @@ import { useAuthStore } from '../../stores/authStore';
 export const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    
+    setIsLoading(true);
     try {
       await login(email, password);
       toast({
@@ -34,18 +33,25 @@ export const LoginForm = () => {
         duration: 3000,
       });
       navigate('/');
-    } catch (err) {
-      setError('Invalid email or password');
+    } catch (error) {
+      toast({
+        title: 'Login failed',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Box maxW="md" mx="auto" mt={8}>
       <VStack spacing={8} align="stretch">
-        <Heading textAlign="center">Login</Heading>
+        <Heading>Login</Heading>
         <form onSubmit={handleSubmit}>
           <VStack spacing={4}>
-            <FormControl isInvalid={!!error}>
+            <FormControl>
               <FormLabel>Email</FormLabel>
               <Input
                 type="email"
@@ -55,7 +61,7 @@ export const LoginForm = () => {
               />
             </FormControl>
 
-            <FormControl isInvalid={!!error}>
+            <FormControl>
               <FormLabel>Password</FormLabel>
               <Input
                 type="password"
@@ -63,7 +69,6 @@ export const LoginForm = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <FormErrorMessage>{error}</FormErrorMessage>
             </FormControl>
 
             <Button
@@ -79,9 +84,9 @@ export const LoginForm = () => {
 
         <Text textAlign="center">
           Don't have an account?{' '}
-          <Text as={RouterLink} to="/register" color="brand.500">
+          <Link as={RouterLink} to="/register" color="brand.500">
             Register here
-          </Text>
+          </Link>
         </Text>
       </VStack>
     </Box>

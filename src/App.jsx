@@ -7,6 +7,8 @@ import { Dashboard } from './pages/Dashboard'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { Navbar } from './components/layout/Navbar'
 import { theme } from './theme'
+import { ActivityForm } from './components/activities/ActivityForm'
+import { Marketplace } from './pages/Marketplace'
 
 const queryClient = new QueryClient()
 
@@ -20,6 +22,14 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginForm />} />
             <Route path="/register" element={<RegisterForm />} />
+            <Route
+              path="/marketplace"
+              element={
+                <ProtectedRoute>
+                  <Marketplace />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/"
               element={
